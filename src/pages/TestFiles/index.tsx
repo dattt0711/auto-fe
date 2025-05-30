@@ -15,15 +15,15 @@ const TestFiles = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [pageIndex, setPageIndex] = useState(0);
+  const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const [socket, setSocket] = useState<Socket | null>(null);
 
-  // Fetch test files
-  const { data: testFilesResponse } = useQuery<ListTestFilesResponse>({
-    queryKey: ["testFiles"],
-    queryFn: testFilesService.getTestFiles,
+  // Fetch test files with pagination
+  const { data: testFilesResponse, isLoading } = useQuery<ListTestFilesResponse>({
+    queryKey: ["test-files", page, pageSize],
+    queryFn: () => testFilesService.getTestFiles({ page, limit: pageSize }),
   });
 
   const testFiles = testFilesResponse?.data?.data || [];
@@ -139,13 +139,27 @@ const TestFiles = () => {
     uploadMutation.mutate({ file, testFileName });
   };
 
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage + 1); // Convert from 0-based to 1-based index
+  };
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    setPageSize(newPageSize);
+    setPage(1); // Reset to first page when changing page size
+  };
+
   const columns = createColumns(navigate, uploadProgress);
 
   return (
     <div className="container mx-auto py-6">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Test Files Management</CardTitle>
+          <div className="space-y-1">
+            <CardTitle>Test Files Management</CardTitle>
+            <div className="text-sm text-muted-foreground">
+              Total Documents: {testFilesResponse?.data?.total ?? 0}
+            </div>
+          </div>
           <div className="flex items-center gap-2">
             <UploadDialog
               isOpen={isDialogOpen}
@@ -159,12 +173,13 @@ const TestFiles = () => {
           <TableComponent
             columns={columns}
             data={testFiles}
+            isLoading={isLoading}
             pagination={{
               pageCount: Math.ceil((testFilesResponse?.data?.total || 0) / pageSize),
-              pageIndex,
+              pageIndex: page - 1, // Convert to 0-based index for the table
               pageSize,
-              onPageChange: setPageIndex,
-              onPageSizeChange: setPageSize,
+              onPageChange: handlePageChange,
+              onPageSizeChange: handlePageSizeChange,
             }}
           />
         </CardContent>

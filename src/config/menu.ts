@@ -1,9 +1,9 @@
 import {
     CircleAlert,
     Files,
-    Gauge,
     LucideIcon,
-    TestTube
+    TestTube,
+    BarChart
 } from 'lucide-react'
 
 type MenuItemType = {
@@ -17,14 +17,14 @@ type MenuType = MenuItemType[]
 
 export const mainMenu: MenuType = [
     {
-        title: 'Dashboard',
-        url: '/',
-        icon: Gauge
-    },
-    {
         title: 'Test Management',
         url: '/test-files',
         icon: TestTube
+    },
+    {
+        title: 'Reports',
+        url: '/reports',
+        icon: BarChart
     },
     {
         title: 'Pages',

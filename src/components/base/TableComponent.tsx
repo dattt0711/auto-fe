@@ -110,6 +110,7 @@ export function TableComponent<TData extends object>({
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
             <Button
+              className="cursor-pointer"
               variant="outline"
               size="sm"
               onClick={() => pagination.onPageChange(pagination.pageIndex - 1)}
@@ -121,6 +122,7 @@ export function TableComponent<TData extends object>({
               Page {pagination.pageIndex + 1} of {pagination.pageCount}
             </span>
             <Button
+              className="cursor-pointer"
               variant="outline"
               size="sm"
               onClick={() => pagination.onPageChange(pagination.pageIndex + 1)}

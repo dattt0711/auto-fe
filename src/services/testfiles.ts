@@ -25,6 +25,11 @@ export interface ListTestFilesResponse {
   }
 }
 
+export interface GetTestFilesParams {
+  page?: number;
+  limit?: number;
+}
+
 export const testFilesService = {
   uploadTestFile: async (file: File, testFileName: string): Promise<UploadTestFileResponse> => {
     const formData = new FormData();
@@ -44,17 +49,37 @@ export const testFilesService = {
     return response.data;
   },
 
-  getTestFiles: async (): Promise<ListTestFilesResponse> => {
+  getTestFiles: async (params?: GetTestFilesParams): Promise<ListTestFilesResponse> => {
     const response = await axios.get<ListTestFilesResponse>(
-      `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.TEST_FILES.LIST}`
+      `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.TEST_FILES.LIST}`,
+      {
+        params: {
+          page: params?.page || 1,
+          limit: params?.limit || 10,
+        },
+      }
     );
     return response.data;
   },
 
   getTestFileById: async (id: string): Promise<TestFile> => {
-    const response = await axios.get<TestFile>(
+    const response = await axios.get<{ isSuccess: boolean, data: TestFile }>(
       `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.TEST_FILES.DETAIL(id)}`
     );
-    return response.data;
+    // Mock data for testing
+    const mockData = {
+      ...response.data.data,
+      input_variables: JSON.stringify({
+        environment: "production",
+        timeout: 30000,
+        retryCount: 3,
+        features: ["auth", "payment", "notifications"],
+        config: {
+          apiVersion: "v2",
+          debug: true
+        }
+      })
+    };
+    return mockData;
   }
 }; 

@@ -76,7 +76,7 @@ export const createColumns = (
         variant="outline"
         onClick={() => navigate(`/test-files/${row.original._id}`)}
       >
-        View Details
+        View Detail
       </Button>
     ),
   },

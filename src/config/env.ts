@@ -6,6 +6,10 @@ export const API_CONFIG = {
       UPLOAD: '/test-files/upload',
       DETAIL: (id: string) => `/test-files/${id}`,
     },
+    REPORTS: {
+      LIST: '/reports',
+      DETAIL: (id: string) => `/reports/${id}`,
+    },
   },
   SOCKET: {
     URL: import.meta.env.VITE_SOCKET_URL || 'http://localhost:3005',

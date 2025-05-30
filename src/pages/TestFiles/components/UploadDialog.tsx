@@ -135,10 +135,10 @@ export function UploadDialog({
           )}
         </div>
         <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={handleClose}>
+          <Button className="cursor-pointer" variant="outline" onClick={handleClose}>
             Cancel
           </Button>
-          <Button onClick={handleUpload} disabled={isUploading}>
+          <Button className="cursor-pointer" onClick={handleUpload} disabled={isUploading}>
             {isUploading ? "Uploading..." : "Upload"}
           </Button>
         </div>

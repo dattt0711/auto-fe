@@ -1,32 +1,42 @@
 import axios from 'axios';
-import { baseUrl } from '@/config/app';
+import { API_URL } from '../config/constants';
 
 export interface Testcase {
-  id: string;
-  itemNo: string;
-  stepConfirm: string;
-  expectationResult: string;
+  _id: string;
+  file_id: string;
+  row_index: number;
+  data: Record<string, any>;
+  is_processed: boolean;
+  automation_code: any;
 }
+
+export interface TestcasePaginationResponse {
+  data: Testcase[];
+  total: number;
+  limit: number;
+  page: number;
+}
+
 
 export interface TestcaseResponse {
-  data: any[];
-  total: number;
-  page: number;
-  limit: number;
+  isSuccess: boolean;
+  data: TestcasePaginationResponse
 }
 
-export const getTestcases = async (page: number = 1, limit: number = 10): Promise<TestcaseResponse> => {
-  try {
-    const response = await axios.get(`http://localhost:3005/test-files/testcases`, {
+export const getTestcasesByFileId = async (
+  fileId: string,
+  page: number = 1,
+  limit: number = 10
+): Promise<TestcasePaginationResponse> => {
+  const response = await axios.get<TestcaseResponse>(
+    `${API_URL}/test-files/testcases`,
+    {
       params: {
         page,
         limit,
+        file_id: fileId,
       },
-    });
-    console.log('API Response:', response.data);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching testcases:', error);
-    throw error;
-  }
+    }
+  );
+  return response.data.data;
 }; 
