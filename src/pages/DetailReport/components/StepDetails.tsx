@@ -2,58 +2,43 @@ import { Badge } from "@/components/ui/badge";
 
 interface TestStep {
   step: string;
-  status: "passed" | "failed" | "skipped";
-  message?: string;
-  sub_steps?: TestStep[];
+  isSuccess: boolean;
+  description: string;
+  errorMessage?: string;
 }
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "passed":
-      return "bg-green-500";
-    case "failed":
-      return "bg-red-500";
-    case "skipped":
-      return "bg-gray-500";
-    default:
-      return "bg-gray-500";
-  }
+const getStatusColor = (isSuccess: boolean) => {
+  return isSuccess ? "bg-green-500" : "bg-red-500";
+};
+
+const StepItem = ({ step, level = 0 }: { step: TestStep; index: number; level?: number }) => {
+  const indentClass = level > 0 ? `ml-${level * 6}` : "";
+
+  return (
+    <div className={`space-y-2 ${indentClass}`}>
+      <div className="flex items-start gap-2">
+        <div className="min-w-[2rem] font-medium text-gray-500">{step.step}</div>
+        <div className="flex-1 space-y-1">
+          {step.description && (
+            <div className="text-sm text-dark-500">{step.description}</div>
+          )}
+          {step.errorMessage && (
+            <div className="text-sm text-red-500 whitespace-pre-line">{step.errorMessage}</div>
+          )}
+        </div>
+        <Badge className={getStatusColor(step.isSuccess)}>
+          {step.isSuccess ? "Passed" : "Failed"}
+        </Badge>
+      </div>
+    </div>
+  );
 };
 
 export const StepDetails = ({ steps }: { steps: TestStep[] }) => {
   return (
     <div className="space-y-4">
       {steps.map((step, index) => (
-        <div key={index} className="space-y-2">
-          <div className="flex items-start gap-2">
-            <Badge className={getStatusColor(step.status)}>
-              {step.status}
-            </Badge>
-            <div>
-              <div className="font-medium">{step.step}</div>
-              {step.message && (
-                <div className="text-sm text-red-500">{step.message}</div>
-              )}
-            </div>
-          </div>
-          {step.sub_steps && step.sub_steps.length > 0 && (
-            <div className="ml-6 border-l-2 border-gray-200 pl-4 space-y-2">
-              {step.sub_steps.map((subStep, subIndex) => (
-                <div key={subIndex} className="flex items-start gap-2">
-                  <Badge className={getStatusColor(subStep.status)}>
-                    {subStep.status}
-                  </Badge>
-                  <div>
-                    <div className="font-medium">{subStep.step}</div>
-                    {subStep.message && (
-                      <div className="text-sm text-red-500">{subStep.message}</div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <StepItem key={index} step={step} index={index} />
       ))}
     </div>
   );

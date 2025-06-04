@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_URL } from '../config/constants';
+import { API_CONFIG } from '@/config/env';
 
 export interface Testcase {
   _id: string;
@@ -17,10 +17,15 @@ export interface TestcasePaginationResponse {
   page: number;
 }
 
-
 export interface TestcaseResponse {
   isSuccess: boolean;
   data: TestcasePaginationResponse
+}
+
+export interface RunTestcaseResponse {
+  isSuccess: boolean;
+  report_id: string;
+  message: string;
 }
 
 export const getTestcasesByFileId = async (
@@ -29,7 +34,7 @@ export const getTestcasesByFileId = async (
   limit: number = 10
 ): Promise<TestcasePaginationResponse> => {
   const response = await axios.get<TestcaseResponse>(
-    `${API_URL}/test-files/testcases`,
+    `${API_CONFIG.BASE_URL}/test-files/testcases`,
     {
       params: {
         page,
@@ -39,4 +44,17 @@ export const getTestcasesByFileId = async (
     }
   );
   return response.data.data;
+};
+
+export const runTestcase = async (
+  testcaseId: string,
+  reportName: string
+): Promise<RunTestcaseResponse> => {
+  const response = await axios.post<RunTestcaseResponse>(
+    `${API_CONFIG.BASE_URL}/executor/run/testcase/${testcaseId}`,
+    {
+      report_name: reportName
+    }
+  );
+  return response.data;
 }; 

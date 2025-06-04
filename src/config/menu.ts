@@ -1,6 +1,5 @@
 import {
     CircleAlert,
-    Files,
     LucideIcon,
     TestTube,
     BarChart
@@ -25,25 +24,5 @@ export const mainMenu: MenuType = [
         title: 'Reports',
         url: '/reports',
         icon: BarChart
-    },
-    {
-        title: 'Pages',
-        url: '/pages',
-        icon: Files,
-        items: [
-            {
-                title: 'Sample Page',
-                url: '/pages/sample',
-            },
-            {
-                title: 'Coming Soon',
-                url: '/pages/feature',
-            },
-        ]
-    },
-    {
-        title: 'Error',
-        url: '/404',
-        icon: CircleAlert,
     },
 ]

@@ -1,12 +1,20 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { Button } from "@/components/ui/button";
 import { Testcase } from "@/services/testcase";
+import { Play } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ColumnsProps {
   onEdit: (testcase: Testcase) => void;
+  onRun: (testcase: Testcase) => void;
 }
 
-export const createColumns = ({ onEdit }: ColumnsProps): ColumnDef<Testcase>[] => [
+export const createColumns = ({ onEdit, onRun }: ColumnsProps): ColumnDef<Testcase>[] => [
   {
     accessorKey: 'row_index',
     header: 'Row Index',
@@ -31,7 +39,7 @@ export const createColumns = ({ onEdit }: ColumnsProps): ColumnDef<Testcase>[] =
   {
     accessorKey: 'is_processed',
     header: 'Processed',
-    cell: info => info.getValue() ? 'Yes' : 'No',
+    cell: info => info.getValue() ? "Yes" : "No",
   },
   // {
   //   accessorKey: 'automation_code',
@@ -44,18 +52,35 @@ export const createColumns = ({ onEdit }: ColumnsProps): ColumnDef<Testcase>[] =
   // },
   {
     id: 'actions',
-    header: 'Action',
-    cell: ({ row }) => (
-      <div className="flex gap-2">
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => onEdit(row.original)}
-        >
-          Edit
-        </Button>
-        <Button variant="outline" size="sm">Update</Button>
-      </div>
-    ),
+    header: 'Actions',
+    cell: ({ row }) => {
+      const testcase = row.original;
+
+      return (
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onRun(testcase)}
+            className="flex items-center gap-1"
+          >
+            <Play className="h-3 w-3" />
+            Run
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                Edit
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => onEdit(testcase)}>
+                Edit Details
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      );
+    },
   },
 ]; 

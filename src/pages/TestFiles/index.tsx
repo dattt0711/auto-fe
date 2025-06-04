@@ -9,12 +9,22 @@ import { testFilesService, TestFile, ListTestFilesResponse } from "@/services/te
 import { UploadDialog } from "./components/UploadDialog";
 import { createColumns } from "./columns";
 import { API_CONFIG } from "@/config/env";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 const TestFiles = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<TestFile | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
@@ -27,6 +37,50 @@ const TestFiles = () => {
   });
 
   const testFiles = testFilesResponse?.data?.data || [];
+
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (fileId: string) => {
+      const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.TEST_FILES.DETAIL(fileId)}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete test file');
+      }
+      return response.json();
+    },
+    onSuccess: (_, fileId) => {
+      // Update cache optimistically
+      queryClient.setQueryData<ListTestFilesResponse>(["test-files", page, pageSize], (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          data: {
+            ...old.data,
+            data: old.data.data.filter((file) => file._id !== fileId),
+            total: old.data.total - 1,
+          },
+        };
+      });
+
+      setIsDeleteDialogOpen(false);
+      setSelectedFile(null);
+
+      toast({
+        title: "Success",
+        description: "Test file deleted successfully",
+        variant: "success",
+      });
+    },
+    onError: (error: unknown) => {
+      console.error("Delete error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete test file",
+        variant: "destructive",
+      });
+    },
+  });
 
   useEffect(() => {
     // Initialize socket connection with WebSocket transport
@@ -79,7 +133,7 @@ const TestFiles = () => {
 
         // Update status when progress reaches 100%
         if (progressData.progress === 100) {
-          queryClient.setQueryData<ListTestFilesResponse>(["testFiles"], (old) => {
+          queryClient.setQueryData<ListTestFilesResponse>(["test-files", 1, pageSize], (old) => {
             if (!old) return old;
             return {
               ...old,
@@ -104,8 +158,8 @@ const TestFiles = () => {
         input_variables: "",
       };
 
-      // Update cache optimistically
-      queryClient.setQueryData<ListTestFilesResponse>(["testFiles"], (old) => {
+      // Update cache optimistically - use the same query key as the query
+      queryClient.setQueryData<ListTestFilesResponse>(["test-files", 1, pageSize], (old) => {
         if (!old) return old;
         return {
           ...old,
@@ -116,6 +170,9 @@ const TestFiles = () => {
           },
         };
       });
+
+      // Also invalidate the query to ensure we get fresh data
+      queryClient.invalidateQueries({ queryKey: ["test-files"] });
 
       setIsDialogOpen(false);
 
@@ -139,6 +196,17 @@ const TestFiles = () => {
     uploadMutation.mutate({ file, testFileName });
   };
 
+  const handleDelete = (file: TestFile) => {
+    setSelectedFile(file);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (selectedFile) {
+      deleteMutation.mutate(selectedFile._id);
+    }
+  };
+
   const handlePageChange = (newPage: number) => {
     setPage(newPage + 1); // Convert from 0-based to 1-based index
   };
@@ -148,7 +216,7 @@ const TestFiles = () => {
     setPage(1); // Reset to first page when changing page size
   };
 
-  const columns = createColumns(navigate, uploadProgress);
+  const columns = createColumns(navigate, uploadProgress, handleDelete);
 
   return (
     <div className="container mx-auto py-6">
@@ -176,7 +244,7 @@ const TestFiles = () => {
             isLoading={isLoading}
             pagination={{
               pageCount: Math.ceil((testFilesResponse?.data?.total || 0) / pageSize),
-              pageIndex: page - 1, // Convert to 0-based index for the table
+              pageIndex: page - 1,
               pageSize,
               onPageChange: handlePageChange,
               onPageSizeChange: handlePageSizeChange,
@@ -184,6 +252,30 @@ const TestFiles = () => {
           />
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Test File</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{selectedFile?.test_file_name}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleDeleteConfirm}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

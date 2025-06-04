@@ -5,7 +5,6 @@ React + Vite + TypeScript template for building apps with shadcn/ui.
 ## Getting Started
 
 ```bash
-npx degit hayyi2/react-shadcn-starter my-project
 cd my-project
 npm install
 npm run dev
@@ -67,7 +66,3 @@ react-shadcn-starter/
 ├── tsconfig.json      # TypeScript configuration
 └── vite.config.ts     # Vite configuration
 ```
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](https://github.com/hayyi2/react-shadcn-starter/blob/main/LICENSE) file for details.

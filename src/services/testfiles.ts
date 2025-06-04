@@ -30,6 +30,12 @@ export interface GetTestFilesParams {
   limit?: number;
 }
 
+export interface RunAllTestFileResponse {
+  isSuccess: boolean;
+  report_id: string;
+  message: string;
+}
+
 export const testFilesService = {
   uploadTestFile: async (file: File, testFileName: string): Promise<UploadTestFileResponse> => {
     const formData = new FormData();
@@ -69,17 +75,138 @@ export const testFilesService = {
     // Mock data for testing
     const mockData = {
       ...response.data.data,
-      input_variables: JSON.stringify({
-        environment: "production",
-        timeout: 30000,
-        retryCount: 3,
-        features: ["auth", "payment", "notifications"],
-        config: {
-          apiVersion: "v2",
-          debug: true
-        }
-      })
+      // input_variables: JSON.stringify({
+      //   environment: "production",
+      //   timeout: 30000,
+      //   retryCount: 3,
+      //   features: ["auth", "payment", "notifications"],
+      //   config: {
+      //     apiVersion: "v2",
+      //     debug: true
+      //   },
+      //   steps: [
+      //     {
+      //       step: "Initialize test environment",
+      //       status: "pass",
+      //       message: "",
+      //       sub_steps: [
+      //         {
+      //           step: "Load configuration",
+      //           status: "pass",
+      //           message: "",
+      //           sub_steps: [
+      //             {
+      //               step: "Validate config format",
+      //               status: "pass",
+      //               message: ""
+      //             },
+      //             {
+      //               step: "Check required fields",
+      //               status: "pass",
+      //               message: ""
+      //             }
+      //           ]
+      //         },
+      //         {
+      //           step: "Setup test database",
+      //           status: "pass",
+      //           message: "",
+      //           sub_steps: [
+      //             {
+      //               step: "Create test tables",
+      //               status: "pass",
+      //               message: ""
+      //             },
+      //             {
+      //               step: "Seed test data",
+      //               status: "failed",
+      //               message: "Failed to insert test records",
+      //               sub_steps: [
+      //                 {
+      //                   step: "Insert user data",
+      //                   status: "pass",
+      //                   message: ""
+      //                 },
+      //                 {
+      //                   step: "Insert transaction data",
+      //                   status: "failed",
+      //                   message: "Database connection timeout"
+      //                 }
+      //               ]
+      //             }
+      //           ]
+      //         }
+      //       ]
+      //     },
+      //     {
+      //       step: "Execute test scenarios",
+      //       status: "failed",
+      //       message: "Test execution failed",
+      //       sub_steps: [
+      //         {
+      //           step: "Authentication flow",
+      //           status: "pass",
+      //           message: "",
+      //           sub_steps: [
+      //             {
+      //               step: "Login with valid credentials",
+      //               status: "pass",
+      //               message: ""
+      //             },
+      //             {
+      //               step: "Verify token generation",
+      //               status: "pass",
+      //               message: ""
+      //             }
+      //           ]
+      //         },
+      //         {
+      //           step: "Payment processing",
+      //           status: "failed",
+      //           message: "Payment gateway error",
+      //           sub_steps: [
+      //             {
+      //               step: "Validate payment details",
+      //               status: "pass",
+      //               message: ""
+      //             },
+      //             {
+      //               step: "Process payment",
+      //               status: "failed",
+      //               message: "Gateway timeout",
+      //               sub_steps: [
+      //                 {
+      //                   step: "Connect to payment gateway",
+      //                   status: "pass",
+      //                   message: ""
+      //                 },
+      //                 {
+      //                   step: "Submit payment request",
+      //                   status: "failed",
+      //                   message: "Connection timeout after 30s"
+      //                 }
+      //               ]
+      //             }
+      //           ]
+      //         }
+      //       ]
+      //     }
+      //   ]
+      // })
     };
     return mockData;
+  },
+
+  runAllTestFile: async (
+    fileId: string,
+    reportName: string
+  ): Promise<RunAllTestFileResponse> => {
+    const response = await axios.post<RunAllTestFileResponse>(
+      `${API_CONFIG.BASE_URL}/executor/run-all/${fileId}`,
+      {
+        report_name: reportName
+      }
+    );
+    return response.data;
   }
 }; 

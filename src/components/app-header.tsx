@@ -1,6 +1,9 @@
 import { Link, NavLink, useLocation } from 'react-router-dom'
+import { AppLogo } from './app-logo'
+import { AppSidebar } from './app-sidebar'
 import { mainMenu } from '@/config/menu'
 import { cn } from '@/lib/utils'
+import { ChevronDown } from 'lucide-react'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -8,14 +11,10 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { ChevronDown } from 'lucide-react'
-import { AppLogo } from './app-logo'
-import { AppSidebar } from './app-sidebar'
-import { Button, buttonVariants } from './ui/button'
+} from './ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
-import { appConfig, baseUrl } from '@/config/app'
-import GitHub from './icons/github'
+import { baseUrl } from '@/config/app'
+import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 
 export function AppHeader() {
     const location = useLocation()
@@ -81,32 +80,17 @@ export function AppHeader() {
                             ))}
                         </nav>
                     </div>
-                    <nav className="flex gap-1">
-                        <a
-                            href={appConfig.github.url}
-                            title={appConfig.github.title}
-                            target="_blank"
-                            rel="noreferrer"
-                            className={cn(
-                                buttonVariants({
-                                    variant: "ghost",
-                                    size: "icon",
-                                }),
-                                "size-8"
-                            )}>
-                            <GitHub />
-                            <span className="sr-only">GitHub</span>
-                        </a>
+                    <nav className="flex gap-1 items-center">
+                        <NotificationDropdown />
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button
-                                    variant='ghost'
+                                <button
                                     className='relative h-8 w-8 rounded-full cursor-pointer ml-2'>
                                     <Avatar className='h-8 w-8'>
                                         <AvatarImage src={baseUrl + '/avatars/shadcn.jpg'} alt='shadcn' />
                                         <AvatarFallback className="rounded-lg">SC</AvatarFallback>
                                     </Avatar>
-                                </Button>
+                                </button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent className='w-56' align='end' forceMount>
                                 <DropdownMenuLabel className='font-normal'>
@@ -124,6 +108,6 @@ export function AppHeader() {
                     </nav>
                 </div>
             </div>
-        </header >
+        </header>
     )
 }

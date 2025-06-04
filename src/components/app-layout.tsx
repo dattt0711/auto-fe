@@ -15,8 +15,8 @@ export function AppLayout() {
                 <div className="flex-1">
                     <Outlet />
                 </div>
+                <AppFooter />
             </main>
-            <AppFooter />
             <Toaster />
         </div>
     )

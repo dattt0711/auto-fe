@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
 
 interface Report {
-  id: string;
+  _id: string;
   report_name: string;
   progress: number;
   status:  "running" | "success" | "failed";
@@ -36,7 +36,10 @@ export const createColumns = (navigate: (path: string) => void): ColumnDef<Repor
     accessorKey: "name",
     header: "Report Name",
     cell: ({ row }: { row: { original: Report } }) => (
-      <div className="w-[150px] truncate">
+      <div 
+        className="w-[150px] truncate cursor-pointer hover:underline"
+        onClick={() => navigate(`/reports/${row.original._id}`)}
+      >
         {row.original.report_name}
       </div>
     ),
@@ -76,7 +79,7 @@ export const createColumns = (navigate: (path: string) => void): ColumnDef<Repor
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate(`/reports/${row.original.id}`)}
+          onClick={() => navigate(`/reports/${row.original._id}`)}
         >
           <Eye className="h-4 w-4" />
         </Button>

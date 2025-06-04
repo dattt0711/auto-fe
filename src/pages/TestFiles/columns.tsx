@@ -1,98 +1,98 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { Eye, Trash2, Download } from "lucide-react";
 import { TestFile } from "@/services/testfiles";
-import { Download } from "lucide-react";
 import { API_CONFIG } from "@/config/env";
-
-export const getStatusColor = (status: TestFile["status"]) => {
-  switch (status) {
-    case "success":
-      return "bg-green-500";
-    case "failed":
-      return "bg-red-500";
-    case "pending":
-      return "bg-yellow-500";
-    case "processing":
-      return "bg-blue-500";
-    default:
-      return "bg-gray-500";
-  }
-};
-
-const getProgressColor = (progress: number) => {
-  if (progress <= 10) return "bg-rose-400";
-  if (progress <= 30) return "bg-orange-400";
-  if (progress <= 50) return "bg-amber-400";
-  if (progress <= 70) return "bg-sky-400";
-  return "bg-emerald-400";
-};
-
-const capitalizeFirstLetter = (str: string) => {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-};
 
 export const createColumns = (
   navigate: (path: string) => void,
-  uploadProgress: Record<string, number>
+  uploadProgress: Record<string, number>,
+  onDelete: (file: TestFile) => void
 ): ColumnDef<TestFile>[] => [
   {
-    accessorKey: "_id",
-    header: "ID",
-  },
-  {
     accessorKey: "test_file_name",
-    header: "Test File Name",
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
+    header: "Name",
     cell: ({ row }) => (
-      <div className="space-y-2">
-        <Badge className={getStatusColor(row.original.status)}>
-          {capitalizeFirstLetter(row.original.status)}
-        </Badge>
-        {row.original.status === "processing" && uploadProgress[row.original._id] !== undefined && (
-          <Progress 
-            value={uploadProgress[row.original._id]} 
-            className="w-full bg-gray-200"
-            indicatorClassName={`transition-colors duration-300 ${getProgressColor(uploadProgress[row.original._id])}`}
-          />
-        )}
+      <div
+        className="cursor-pointer hover:underline"
+        onClick={() => navigate(`/test-files/${row.original._id}`)}
+      >
+        {row.original.test_file_name}
       </div>
     ),
   },
-  // {
-  //   accessorKey: "input_variables",
-  //   header: "Input Variables",
-  //   cell: ({ row }) => <p>{row.original.input_variables}</p>,
-  // },
+  {
+    accessorKey: "status",
+    header: () => <div className="w-[150px]">Status</div>,
+    cell: ({ row }) => {
+      const status = row.original.status;
+      const progress = uploadProgress[row.original._id];
+      if (status === "processing" && progress !== undefined) {
+        return (
+          <div className="flex items-center gap-2 w-[150px]">
+            <Badge variant="outline">Processing</Badge>
+            <div className="text-sm text-muted-foreground">{progress}%</div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="w-[150px]">
+          <Badge
+            className={
+              status === "success"
+                ? "bg-green-500"
+                : status === "failed"
+                ? "bg-red-500"
+                : "bg-yellow-500"
+            }
+          >
+            <span className="capitalize">{status}</span>
+          </Badge>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "url",
+    header: "URL",
+    cell: ({ row }) => (
+      <div className="flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => window.open(`${API_CONFIG.BASE_URL}/${row.original.url}`, '_blank')}
+          title="Download"
+        >
+          <Download className="h-4 w-4" />
+        </Button>
+      </div>
+    ),
+  },
   {
     id: "actions",
     header: "Actions",
     cell: ({ row }) => (
-      <Button
-        variant="outline"
-        onClick={() => navigate(`/test-files/${row.original._id}`)}
-      >
-        View Detail
-      </Button>
-    ),
-  },
-  {
-    accessorKey: "url",
-    header: "File",
-    cell: ({ row }) => (
-      <Button
-        variant="outline"
-        size="sm"
-        className="flex items-center gap-2"
-        onClick={() => window.open(`${API_CONFIG.BASE_URL}${row.original.url}`, '_blank')}
-      >
-        <Download className="h-4 w-4" />
-        Download
-      </Button>
+      <div className="flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate(`/test-files/${row.original._id}`)}
+          title="View Details"
+        >
+          <Eye className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => onDelete(row.original)}
+          title="Delete"
+          className="text-red-500 hover:text-red-700"
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
     ),
   },
 ]; 

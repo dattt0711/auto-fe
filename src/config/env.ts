@@ -9,6 +9,7 @@ export const API_CONFIG = {
     REPORTS: {
       LIST: '/reports',
       DETAIL: (id: string) => `/reports/${id}`,
+      DETAIL_TESTCASES: (id: string) => `/reports/testcases/${id}`,
     },
   },
   SOCKET: {

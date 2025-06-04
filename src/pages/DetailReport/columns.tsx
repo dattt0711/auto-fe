@@ -10,29 +10,35 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { StepDetails } from './components/StepDetails';
+import { ImagePreviewDialog } from './components/ImagePreviewDialog';
+import { API_CONFIG } from '@/config/env';
 
 interface ReportDetail {
   id: string;
-  testcase_name: string;
-  result: "passed" | "failed" | "skipped";
+  test_case_id: {
+    data: {
+      item_no: string;
+      step_confirm: string;
+    }
+  };
+  status: "success" | "failed";
   error_message?: string;
   evidence_path?: string;
   detail_result: {
     step: string;
-    status: "passed" | "failed" | "skipped";
-    message?: string;
-    sub_steps?: { step: string; status: "passed" | "failed" | "skipped"; message?: string }[];
+    isSuccess: boolean;
+    description: string;
+    errorMessage?: string;
   }[];
 }
 
 const getStatusColor = (status: string) => {
   switch (status) {
+    case "success":
     case "passed":
       return "bg-green-500";
     case "failed":
       return "bg-red-500";
-    case "skipped":
-      return "bg-gray-500";
     default:
       return "bg-gray-500";
   }
@@ -40,31 +46,43 @@ const getStatusColor = (status: string) => {
 
 export const createColumns = (): ColumnDef<ReportDetail>[] => [
   {
-    accessorKey: "testcase_name",
-    header: "Testcase Name",
+    id: "no",
+    header: "No",
     cell: ({ row }) => (
-      <div className="w-[200px] truncate">
-        {row.original.testcase_name}
+      <div className="w-[100px] font-medium">
+        {row.original.test_case_id.data.item_no}
       </div>
     ),
   },
   {
-    accessorKey: "result",
-    header: "Result",
+    accessorKey: "test_case_id",
+    header: "Step Confirm",
+    cell: ({ row }) => {
+      const steps = row.original.test_case_id.data.step_confirm;
+      return (
+        <div className="w-[250px]">
+          <div className="whitespace-pre-line text-sm space-y-1">
+            {steps.split('\n').map((step, index) => (
+              <div key={index} className="flex items-start gap-2">
+                {/* <span className="font-medium text-muted-foreground min-w-[20px]">
+                  {index + 1}.
+                </span> */}
+                <span>{step.trim()}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
     cell: ({ row }) => (
       <div className="w-[100px]">
-        <Badge className={getStatusColor(row.original.result)}>
-          {row.original.result}
+        <Badge className={getStatusColor(row.original.status)}>
+          {row.original.status === "success" ? "passed" : row.original.status}
         </Badge>
-      </div>
-    ),
-  },
-  {
-    accessorKey: "error_message",
-    header: "Error Message",
-    cell: ({ row }) => (
-      <div className="w-[300px] truncate text-red-500">
-        {row.original.error_message || "-"}
       </div>
     ),
   },
@@ -73,15 +91,7 @@ export const createColumns = (): ColumnDef<ReportDetail>[] => [
     header: "Evidence",
     cell: ({ row }) => (
       <div className="w-[100px]">
-        {row.original.evidence_path ? (
-          <Button variant="ghost" size="icon" asChild>
-            <a href={row.original.evidence_path} target="_blank" rel="noopener noreferrer">
-              <Eye className="h-4 w-4" />
-            </a>
-          </Button>
-        ) : (
-          "-"
-        )}
+        <ImagePreviewDialog imageUrl={`${API_CONFIG.BASE_URL}${row.original.evidence_path}`} />
       </div>
     ),
   },
@@ -98,7 +108,7 @@ export const createColumns = (): ColumnDef<ReportDetail>[] => [
           </DialogTrigger>
           <DialogContent className="max-w-3xl">
             <DialogHeader>
-              <DialogTitle>Testcase Details: {row.original.testcase_name}</DialogTitle>
+              <DialogTitle>Testcase Details: {row.original.test_case_id.data.step_confirm}</DialogTitle>
             </DialogHeader>
             <StepDetails steps={row.original.detail_result} />
           </DialogContent>
